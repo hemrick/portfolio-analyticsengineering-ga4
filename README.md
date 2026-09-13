@@ -153,16 +153,6 @@ the root dbt `.env`.
 | `scripts/deploy_semantic_layer.sh` | Yes | Publishes dbt YAML semantic definitions to an already-running Lightdash project. |
 | `lightdash/cloud-run/deploy.sh` | Yes | Provisions and deploys the self-hosted Lightdash app on Google Cloud Run. |
 
-## Documentation
-
-- [Use-case narrative](docs/00-use-case.md)
-- [First-time setup](docs/01-first-time-setup.md)
-- [Run dbt jobs](docs/02-run-dbt-jobs.md)
-- [Compile and deploy the Lightdash semantic layer](docs/03-lightdash-semantic-layer.md)
-- [DataOps and CI/CD](docs/04-dataops.md)
-- [Architecture overview](docs/05-architecture.md)
-- [GA4 BigQuery export notes](docs/context/GA4_bq_export.md)
-
 ## Public Safety
 
 This repository is designed to be public. Real service-account keys, local
