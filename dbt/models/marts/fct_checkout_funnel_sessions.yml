@@ -1,0 +1,222 @@
+version: 2
+
+models:
+  - name: fct_checkout_funnel_sessions
+    description: "Session-level checkout funnel flags from the GA4 ecommerce public sample."
+    config:
+      tags: ["lightdash"]
+      meta:
+        label: "Checkout Funnel Sessions"
+        primary_key: session_id
+        order_fields_by: label
+        group_details:
+          time:
+            label: "Time"
+          acquisition:
+            label: "Traffic Source"
+          funnel_flags:
+            label: "Funnel Flags"
+          funnel_counts:
+            label: "Funnel Counts"
+          session_rates:
+            label: "Session Rates"
+          checkout_rates:
+            label: "Checkout Rates"
+        metrics:
+          add_to_cart_session_rate:
+            label: "Add-to-cart session rate"
+            description: "Share of sessions that reached add_to_cart."
+            type: number
+            sql: "SAFE_DIVIDE(${add_to_cart_sessions}, ${sessions})"
+            format: "0.0%"
+            groups: ["session_rates"]
+
+          begin_checkout_session_rate:
+            label: "Begin-checkout session rate"
+            description: "Share of sessions that reached begin_checkout."
+            type: number
+            sql: "SAFE_DIVIDE(${begin_checkout_sessions}, ${sessions})"
+            format: "0.0%"
+            groups: ["session_rates"]
+
+          add_payment_info_session_rate:
+            label: "Payment-info session rate"
+            description: "Share of sessions that reached add_payment_info."
+            type: number
+            sql: "SAFE_DIVIDE(${add_payment_info_sessions}, ${sessions})"
+            format: "0.0%"
+            groups: ["session_rates"]
+
+          purchase_session_rate:
+            label: "Purchase session rate"
+            description: "Share of sessions that reached purchase."
+            type: number
+            sql: "SAFE_DIVIDE(${purchase_sessions}, ${sessions})"
+            format: "0.0%"
+            groups: ["session_rates"]
+
+          checkout_to_payment_info_rate:
+            label: "Checkout to payment-info rate"
+            description: "Share of begin_checkout sessions that reached add_payment_info."
+            type: number
+            sql: "SAFE_DIVIDE(${add_payment_info_sessions}, ${begin_checkout_sessions})"
+            format: "0.0%"
+            groups: ["checkout_rates"]
+
+          checkout_to_purchase_rate:
+            label: "Checkout to purchase rate"
+            description: "Share of begin_checkout sessions that reached purchase."
+            type: number
+            sql: "SAFE_DIVIDE(${purchase_sessions}, ${begin_checkout_sessions})"
+            format: "0.0%"
+            groups: ["checkout_rates"]
+    columns:
+      - name: session_id
+        description: "Session key built from coalesced GA user identity and ga_session_id."
+        config:
+          meta:
+            dimension:
+              label: "Session ID"
+              type: string
+              hidden: true
+            metrics:
+              sessions:
+                label: "Sessions"
+                description: "Distinct GA4 sessions in the checkout funnel mart."
+                type: count_distinct
+                groups: ["funnel_counts"]
+        tests:
+          - not_null
+          - unique
+
+      - name: session_date
+        description: "Earliest GA4 event export date observed for the session; used as the BigQuery partition column."
+        config:
+          meta:
+            dimension:
+              label: "Session date"
+              type: date
+              time_intervals: ["DAY", "WEEK", "MONTH", "QUARTER", "YEAR"]
+              groups: ["time"]
+        tests:
+          - not_null
+
+      - name: user_acquisition_source
+        description: "GA4 top-level traffic source for the user/session events in this public export. This represents acquisition source, not a fully reconstructed GA4 session attribution model."
+        config:
+          meta:
+            dimension:
+              label: "User acquisition source"
+              type: string
+              groups: ["acquisition"]
+
+      - name: user_acquisition_medium
+        description: "GA4 top-level traffic medium for the user/session events in this public export. This represents acquisition medium, not a fully reconstructed GA4 session attribution model."
+        config:
+          meta:
+            dimension:
+              label: "User acquisition medium"
+              type: string
+              groups: ["acquisition"]
+
+      - name: user_acquisition_campaign
+        description: "GA4 top-level traffic campaign name for the user/session events in this public export. This represents acquisition campaign, not a fully reconstructed GA4 session attribution model."
+        config:
+          meta:
+            dimension:
+              label: "User acquisition campaign"
+              type: string
+              groups: ["acquisition"]
+
+      - name: funnel_events_record
+        description: "Chronologically ordered checkout funnel events observed in the session."
+        config:
+          meta:
+            dimension:
+              label: "Funnel events record"
+              type: string
+              hidden: true
+
+      - name: has_add_to_cart
+        description: "1 when the session contains add_to_cart, otherwise 0."
+        config:
+          meta:
+            dimension:
+              label: "Has add to cart"
+              type: number
+              groups: ["funnel_flags"]
+            metrics:
+              add_to_cart_sessions:
+                label: "Add-to-cart sessions"
+                description: "Sessions that reached add_to_cart."
+                type: sum
+                groups: ["funnel_counts"]
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [0, 1]
+                quote: false
+
+      - name: has_begin_checkout
+        description: "1 when the session contains begin_checkout, otherwise 0."
+        config:
+          meta:
+            dimension:
+              label: "Has begin checkout"
+              type: number
+              groups: ["funnel_flags"]
+            metrics:
+              begin_checkout_sessions:
+                label: "Begin-checkout sessions"
+                description: "Sessions that reached begin_checkout."
+                type: sum
+                groups: ["funnel_counts"]
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [0, 1]
+                quote: false
+
+      - name: has_add_payment_info
+        description: "1 when the session contains add_payment_info, otherwise 0."
+        config:
+          meta:
+            dimension:
+              label: "Has add payment info"
+              type: number
+              groups: ["funnel_flags"]
+            metrics:
+              add_payment_info_sessions:
+                label: "Add-payment-info sessions"
+                description: "Sessions that reached add_payment_info."
+                type: sum
+                groups: ["funnel_counts"]
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [0, 1]
+                quote: false
+
+      - name: has_purchase
+        description: "1 when the session contains purchase, otherwise 0."
+        config:
+          meta:
+            dimension:
+              label: "Has purchase"
+              type: number
+              groups: ["funnel_flags"]
+            metrics:
+              purchase_sessions:
+                label: "Purchase sessions"
+                description: "Sessions that reached purchase."
+                type: sum
+                groups: ["funnel_counts"]
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [0, 1]
+                quote: false

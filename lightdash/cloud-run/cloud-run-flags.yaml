@@ -1,0 +1,19 @@
+# Static Cloud Run runtime settings for the Lightdash service.
+# This file is consumed by deploy.sh through gcloud's native --flags-file.
+#
+# Dynamic deployment values such as image, service account, Cloud SQL instance,
+# environment variables, and secrets remain in deploy.sh because they are
+# assembled from project-specific variables.
+
+--cpu: "2"
+--memory: 2Gi
+--min-instances: "1"
+--concurrency: "10"
+--cpu-boost:
+--allow-unauthenticated:
+--startup-probe:
+  tcpSocket.port: 8080
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 30

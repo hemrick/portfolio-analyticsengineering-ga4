@@ -1,0 +1,35 @@
+version: 2
+
+sources:
+  - name: ga4_obfuscated_sample_ecommerce
+    database: bigquery-public-data
+    schema: ga4_obfuscated_sample_ecommerce
+    tables:
+      - name: events
+        identifier: events_*
+        description: "Public GA4 ecommerce sample event export tables."
+        tests:
+          - ga4_source_has_rows
+          - ga4_funnel_events_have_ga_session_id
+          - ga4_funnel_events_have_user_key
+        columns:
+          - name: event_date
+            description: "GA4 event export date in YYYYMMDD format."
+            tests:
+              - not_null:
+                  config:
+                    where: "_TABLE_SUFFIX between '{{ var('ga4_start_date', '2020-11-01') | replace('-', '') }}' and '{{ var('ga4_end_date', '2021-01-31') | replace('-', '') }}'"
+
+          - name: event_timestamp
+            description: "GA4 event timestamp in microseconds."
+            tests:
+              - not_null:
+                  config:
+                    where: "_TABLE_SUFFIX between '{{ var('ga4_start_date', '2020-11-01') | replace('-', '') }}' and '{{ var('ga4_end_date', '2021-01-31') | replace('-', '') }}'"
+
+          - name: event_name
+            description: "GA4 event name."
+            tests:
+              - not_null:
+                  config:
+                    where: "_TABLE_SUFFIX between '{{ var('ga4_start_date', '2020-11-01') | replace('-', '') }}' and '{{ var('ga4_end_date', '2021-01-31') | replace('-', '') }}'"

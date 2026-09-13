@@ -1,0 +1,15 @@
+name: "portfolio_analyticsengineering_ga4"
+version: "1.0.0"
+config-version: 2
+
+profile: "portfolio_analyticsengineering_ga4"
+
+model-paths: ["models"]
+macro-paths: ["macros"]
+target-path: "target"
+clean-targets: ["target", "dbt_packages"]
+packages-install-path: "dbt_packages"
+
+vars:
+  ga4_start_date: "2020-11-01"
+  ga4_end_date: "2021-01-31"

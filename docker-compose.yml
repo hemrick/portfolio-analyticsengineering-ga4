@@ -1,0 +1,10 @@
+services:
+  dbt:
+    build: .
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      GCP_SERVICE_ACCOUNT_LOAD_AND_DBT: /app/credentials/service-account.json
+    volumes:
+      - ${GCP_SERVICE_ACCOUNT_LOAD_AND_DBT:-./service-account.json}:/app/credentials/service-account.json:ro
