@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    env:
+      DBT_BQ_PROJECT: ci-placeholder-project
+      DBT_BQ_DATASET: analytics_engineering_ga4
+      DBT_BQ_LOCATION: US
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: pyproject.toml
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Create dbt compile credential stub
+        run: |
+          credential_path="$(./scripts/create_dbt_ci_service_account.sh "$RUNNER_TEMP/service-account-ci.json")"
+          echo "GCP_SERVICE_ACCOUNT_LOAD_AND_DBT=$credential_path" >> "$GITHUB_ENV"
+
+      - name: Validate shell scripts
+        run: bash -n run_pipeline.sh scripts/*.sh lightdash/cloud-run/deploy.sh
+
+      - name: Parse dbt project
+        run: uv run dbt parse --project-dir dbt --profiles-dir dbt --no-populate-cache
+
+      - name: Compile dbt mart and semantic YAML
+        run: uv run dbt compile --project-dir dbt --profiles-dir dbt --select fct_checkout_funnel_sessions --no-populate-cache
+
+      - name: Validate dbt runner compose
+        run: docker compose config
+
+      - name: Validate Lightdash compose
+        run: docker compose --env-file lightdash/.env.example -f lightdash/docker-compose.yml config
+
+      - name: Build dbt runner image
+        run: docker build .

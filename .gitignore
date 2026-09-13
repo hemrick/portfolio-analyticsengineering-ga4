@@ -1,0 +1,34 @@
+# GCP service account keys and local credentials
+service-account.json
+*service-account*.json
+*.private.json
+credentials/
+!*.example.json
+
+# Local environment
+.env
+.envrc
+.venv/
+env/
+venv/
+__pycache__/
+*.py[cod]
+
+# dbt
+dbt/target/
+dbt/dbt_packages/
+dbt/logs/
+dbt/.user.yml
+
+# Python packaging/build output
+build/
+dist/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# OS/editor
+.DS_Store
+.idea/
+.vscode/

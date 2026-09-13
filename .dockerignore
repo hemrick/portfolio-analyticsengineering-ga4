@@ -1,0 +1,15 @@
+.git
+.gitignore
+.env
+.venv
+__pycache__
+*.pyc
+
+service-account.json
+credentials
+
+dbt/target
+dbt/dbt_packages
+dbt/logs
+
+specs
